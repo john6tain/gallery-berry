@@ -5,9 +5,10 @@ import fs from 'fs';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
-  const dirRelativeToPublicFolder = `img/${req.query.path ?? ''}`;
-
-  const dir = path.resolve('./public', dirRelativeToPublicFolder);
+  const dirRelativeToPublicFolder = `${req.query.path ?? ''}`;
+  const publicFolder = `C:\\Users\\John\\Documents\\test-pic`;
+  // const publicFolder = `./public`;
+  const dir = path.resolve(publicFolder, dirRelativeToPublicFolder);
   let filenames = [];
   if (fs.lstatSync(dir).isDirectory()) {
     filenames = fs.readdirSync(dir);
@@ -16,7 +17,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
       key: index,
       name: name,
       imageDir: path.join('/', dirRelativeToPublicFolder, name),
-      isDir: fs.lstatSync(path.resolve('./public', dirRelativeToPublicFolder, name)).isDirectory()
+      isDir: fs.lstatSync(path.resolve(publicFolder, dirRelativeToPublicFolder, name)).isDirectory()
     }))
 
     res.statusCode = 200;
