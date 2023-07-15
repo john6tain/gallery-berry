@@ -22,7 +22,7 @@ export default function Home() {
   function handleClick(dir: string, isDir: boolean) {
     if (isDir) {
       setShowgallery(false);
-      fetcher(`/api/images?path=${dir.replace(/\img/g, '')}`).then((res: any) => {
+      fetcher(`/api/images?path=${dir}`).then((res: any) => {
         setImages(res);
       }, error =>
         console.log(error)

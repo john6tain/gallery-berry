@@ -22,7 +22,7 @@ export function Thumbnail({ name, imageDir, isDir, onPress, openGallery }: Thumb
     } else {
         return (
             <>
-                <img src={imageDir} alt={name} width="25%" height="25%" onClick={openGallery} />
+                <img src={`/api/images?path=${imageDir}`} alt={name} width="25%" height="25%" onClick={openGallery} />
                 <p>{name}</p>
             </>
         )

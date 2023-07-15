@@ -21,7 +21,7 @@ import Lightbox, { ImagesListType } from "react-spring-lightbox";
 
 export function Gallery({ rawImages, handleClick }: any) {
 
-    const images = rawImages.map((image: any) => ({ src: image.imageDir }));
+    const images = rawImages.map((image: any) => ({ src: `/api/images?path=${image.imageDir}` }));
 
     const [currentImageIndex, setCurrentIndex] = useState(0);
 
