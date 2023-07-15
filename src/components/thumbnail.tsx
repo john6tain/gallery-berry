@@ -1,5 +1,6 @@
 import React from "react";
 import { Gallery } from "./galerry";
+import { cwd } from "process";
 
 type ThumbnailProps = {
     name: string,
@@ -10,6 +11,7 @@ type ThumbnailProps = {
 };
 
 export function Thumbnail({ name, imageDir, isDir, onPress, openGallery }: ThumbnailProps) {
+    const [imageURL, setImageUrl] = React.useState('')
     if (isDir) {
         return (
             <>
@@ -20,12 +22,24 @@ export function Thumbnail({ name, imageDir, isDir, onPress, openGallery }: Thumb
             </>
         )
     } else {
+        fetch(`/api/images?path=${imageDir}`)
+            .then((response) => response.blob())
+            .then((myBlob) => {
+                const objectURL = URL.createObjectURL(myBlob);
+                setImageUrl(objectURL);
+            });
         return (
             <>
-                <img src={`/api/images?path=${imageDir}`} alt={name} width="25%" height="25%" onClick={openGallery} />
+                <img src={imageURL} alt={name} width="25%" height="25%" onClick={openGallery} />
                 <p>{name}</p>
             </>
         )
+        // return (
+        //     <>
+        //         <img src={`/api/images?path=${imageDir}`} alt={name} width="25%" height="25%" onClick={openGallery} />
+        //         <p>{name}</p>
+        //     </>
+        // )
     }
 
 }
