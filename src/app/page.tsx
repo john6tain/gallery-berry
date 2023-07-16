@@ -25,11 +25,16 @@ export default function Home() {
     setIsLoading(true);
     fetcher('/api/images').then((res: any) => {
       setImages(res.filter((image: any) => !image.isDir));
+      setVideos([]);
       setFolders(res.filter((image: any) => image.isDir));
       setIsLoading(false);
     }, error =>
       console.log(error)
     )
+  }
+
+  function goBack(){
+    setShowgallery(false);
   }
 
   function handleClick(dir: string, isDir: boolean) {
@@ -69,7 +74,7 @@ export default function Home() {
   if (showGallery) {
     return (
       <>
-        <Gallery images={images.map(image => ({ src: URL.createObjectURL(image) }))} handleClick={() => goHome()}></Gallery >
+        <Gallery images={images.map(image => ({ src: URL.createObjectURL(image.src) }))} handleClick={() => goHome()} goBack={() => goBack()}></Gallery >
       </>
     )
 
@@ -83,27 +88,12 @@ export default function Home() {
           {isLoading && <div className='float-right'>
             <InfinitySpin
               width='150'
-              color="#4fa94d"
+              // color="#4fa94d"
+              color="#3ccede"
             />
           </div>}
 
         </div>
-        {videos.length &&
-          videos.map((video: any, index) => {
-            return (
-              <div key={index}>
-                <video
-                  src={`/api/images?path=${video.imageDir}`}
-                  width="800px"
-                  height="auto"
-                  controls
-                  // autoPlay
-                  id="video-player"
-                />
-                <p>{video.name}</p>
-              </div>
-            );
-          }) || ''}
 
         {!images.length && folders.map((image: any) => (
           <Thumbnail
@@ -113,20 +103,46 @@ export default function Home() {
             isDir={image.isDir}
             onPress={() => handleClick(image.imageDir, image.isDir)}
             openGallery={() => openGallery()}></Thumbnail>
-        )) || images.map((image: any, index) => {
-          return (
-            <div key={index}>
-              <Image
-                src={URL.createObjectURL(image.src)}
-                alt={`Image ${index}`}
-                onClick={() => { openGallery() }}
-                width={250}
-                height={250}
-              />
-              <p>{image.name}</p>
-            </div>
-          );
-        })}
+        )) || (
+            <div className="container flex flex-wrap mx-auto">
+
+              {images.map((image: any, index) => {
+                return (
+
+                  <div className="w-full p-2 rounded lg:w-64 sm:w-64 grow" key={index}>
+                    <img
+                      src={URL.createObjectURL(image.src)}
+                      alt={`Image ${index}`}
+                      onClick={() => { openGallery() }}
+                      // width={250}
+                      // height={250}
+                      // className="lg-w-64 sm:w-1/2"
+                    />
+                    <p>{image.name}</p>
+                  </div>
+
+                );
+              })}
+
+
+              {videos.length &&
+                videos.map((video: any, index) => {
+                  return (
+                    <div className="w-full p-2 rounded lg:w-64 sm:w-64 grow" key={index}>
+                      <video
+                        src={`/api/images?path=${video.imageDir}`}
+                        width="250px"
+                        height="auto"
+                        controls
+                        // autoPlay
+                        id="video-player"
+                      />
+                      <p>{video.name}</p>
+                    </div>
+                  );
+                }) || ''}
+
+            </div>)}
       </>
     )
   }
