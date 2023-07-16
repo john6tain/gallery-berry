@@ -1,29 +1,11 @@
-// type GalleryImage = {
-//     name: string,
-//     imageDir: string,
-//     isDir: boolean,
-// };
+import PQueue from 'p-queue';
+import axios, { AxiosResponse } from 'axios';
 
-export const loadImage = (currentImage: any) => {
-    return fetch(`/api/images?path=${currentImage.imageDir}`, {
-        method: 'GET',
-        headers: {
-            "Content-Type": "image/jpeg",
-        }
-    })
-    // .then((response) => {
-    //     return covertBlobToImage(response.blob());
-    // });
-};
+const imageQueue = new PQueue({ concurrency: 1 }); // You can adjust the concurrency as per your needs
 
-
-export const covertBlobToImage = (imageBlob: any) => {
-    // return new Promise((resolve, reject) => {
-    const image = new Image();
-    // image.onload = () => resolve(image);
-    // image.onerror = (err) => reject(err);
-    image.src = URL.createObjectURL(imageBlob)
-
-    return image;
-    // });
-};
+export async function fetchImage(url: string): Promise<Blob> {
+  return imageQueue.add(async () => {
+    const response: AxiosResponse = await axios.get(url, { responseType: 'blob' });
+    return response.data;
+  });
+}

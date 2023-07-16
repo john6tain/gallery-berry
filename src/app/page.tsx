@@ -1,40 +1,57 @@
 'use client'
 import { Gallery } from '@/components/galerry';
 import { Thumbnail } from '@/components/thumbnail';
-import { covertBlobToImage, loadImage } from '@/utils/loadImage';
+import { fetchImage } from '@/utils/loadImage';
 import React from 'react';
 import Image from 'next/image'
 import { cwd } from 'process';
+import { InfinitySpin } from 'react-loader-spinner';
 
 export default function Home() {
-  const [images, setImages] = React.useState([]);
+  const [images, setImages] = React.useState<Blob[]>([]);
   const [folders, setFolders] = React.useState([]);
   const [showGallery, setShowgallery] = React.useState(false);
-  const [imageLoaded, setImageLoaded] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(false);
 
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-  };
   const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-  React.useEffect(() => {
+  
+  function goHome() {
+    setShowgallery(false);
+    setIsLoading(true);
     fetcher('/api/images').then((res: any) => {
       setImages(res.filter((image: any) => !image.isDir));
       setFolders(res.filter((image: any) => image.isDir));
+      setIsLoading(false);
     }, error =>
       console.log(error)
     )
+  }
+  React.useEffect(() => {
+    goHome();
   }, [setImages, setFolders]);
 
 
   function handleClick(dir: string, isDir: boolean) {
     if (isDir) {
       setShowgallery(false);
+      setIsLoading(true);
       fetcher(`/api/images?path=${dir}`).then((res: any) => {
-        const images = res.filter((image: any) => !image.isDir)
-        console.log(images);
-        setImages(images);
         setFolders(res.filter((image: any) => image.isDir));
+        const images = res.filter((image: any) => !image.isDir)
+        setIsLoading(false);
+        const fetchImages = async () => {
+          setIsLoading(true);
+          const promises: Promise<Blob>[] = images.map((image: any) => fetchImage(`/api/images?path=${image.imageDir}`));
+          try {
+            const images: Blob[] = await Promise.all(promises);
+            setImages(images);
+            setIsLoading(false);
+          } catch (error) {
+            console.error('Error fetching images:', error);
+          }
+        };
+
+        fetchImages();
       }, error =>
         console.log(error)
       )
@@ -42,24 +59,32 @@ export default function Home() {
       debugger
     }
   }
-  function openGallery(dir: string, isDir: boolean) {
-    if (!isDir) {
-      setShowgallery(true);
-    }
+  function openGallery() {
+    setShowgallery(true);
   }
   if (showGallery) {
     return (
       <>
-        <Gallery rawImages={images} handleClick={() => handleClick('', true)}></Gallery>
+        <Gallery images={images.map(image => ({ src: URL.createObjectURL(image) }))} handleClick={() => goHome()}></Gallery >
       </>
     )
 
   } else {
     return (
       <>
-        <a href='#'>
-          <h1 className="text-center mb-2" onClick={() => handleClick('', true)}>Gallery berry 2</h1>
-        </a>
+        <div className='flex justify-between'>
+          <a href='#' className='grow'>
+            <h1 className="text-center mb-2" onClick={() => handleClick('', true)}>Gallery berry 2</h1>
+          </a>
+          {isLoading && <div className='float-right'>
+            <InfinitySpin
+              width='150'
+              color="#4fa94d"
+            />
+          </div>}
+
+        </div>
+
         {!images.length && folders.map((image: any) => (
           <Thumbnail
             key={image.key}
@@ -67,27 +92,17 @@ export default function Home() {
             imageDir={image.imageDir}
             isDir={image.isDir}
             onPress={() => handleClick(image.imageDir, image.isDir)}
-            openGallery={() => openGallery(image.imageDir, image.isDir)}></Thumbnail>
-        )) || images.map((image: any) => {
+            openGallery={() => openGallery()}></Thumbnail>
+        )) || images.map((image: any, index) => {
           return (
-            <div key={`${image.name}-${image.key}`}>
-              <img
-                key={`${image.name}-${image.imageDir}-${image.key}`}
-                src={`/api/images?path=${image.imageDir}`}
-                alt="Your Image"
-                onLoad={handleImageLoad}
-                width="250"
-                height="250"
-                style={{ display: imageLoaded ? 'block' : 'none' }}
-                onClick={() => openGallery(image.imageDir, image.isDir)}
-              />
-              {!imageLoaded && <p>Loading image...</p>}
-              {imageLoaded && (
-                <div>
-                  {/* Your components that you want to render after the image is loaded */}
-                </div>
-              )}
-            </div>
+            <Image
+              key={index}
+              src={URL.createObjectURL(image)}
+              alt={`Image ${index}`}
+              onClick={() => { openGallery() }}
+              width={250}
+              height={250}
+            />
           );
         })}
       </>

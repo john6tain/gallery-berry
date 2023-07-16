@@ -3,13 +3,11 @@ import path from 'path';
 import fs from 'fs';
 import { PUBLIC_FOLDER } from '../../../env';
 
-// export const config = {
-//   api: {
-//     images: {
-//       responseLimit: false,
-//     }
-//   },
-// }
+export const config = {
+  api: {
+    responseLimit: false,
+  },
+}
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
