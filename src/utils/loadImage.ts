@@ -1,7 +1,7 @@
 import PQueue from 'p-queue';
 import axios, { AxiosResponse } from 'axios';
 
-const imageQueue = new PQueue({ concurrency: 10 }); // You can adjust the concurrency as per your needs
+const imageQueue = new PQueue({ concurrency: 1 }); // You can adjust the concurrency as per your needs
 
 export async function fetchImage(url: string, name: string): Promise<any> {
   return imageQueue.add(async () => {
