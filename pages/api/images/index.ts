@@ -28,9 +28,45 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     res.statusCode = 200;
     res.json(images);
   } else {
-    res.setHeader('Content-Type', 'image/jpg');
-    const imageBuffer = fs.readFileSync(dir);
-    res.send(imageBuffer)
+    const fileType = dir.toLocaleLowerCase().split('.').pop();
+    if (fileType === 'mp4') {
+      const CHUNK_SIZE_IN_BYTES = 1000000; // 1 mb
+      const range = req.headers.range;
+
+      if (!range) {
+        return res.status(400).send("Rang must be provided");
+      }
+      const videoSizeInBytes = fs.statSync(dir).size;
+
+      const chunkStart = Number(range.replace(/\D/g, ""));
+
+      const chunkEnd = Math.min(
+        chunkStart + CHUNK_SIZE_IN_BYTES,
+        videoSizeInBytes - 1
+      );
+
+      const contentLength = chunkEnd - chunkStart + 1;
+
+      const headers = {
+        "Content-Range": `bytes ${chunkStart}-${chunkEnd}/${videoSizeInBytes}`,
+        "Accept-Ranges": "bytes",
+        "Content-Length": contentLength,
+        "Content-Type": "video/mp4",
+      };
+
+      res.writeHead(206, headers);
+      const videoStream = fs.createReadStream(dir, {
+        start: chunkStart,
+        end: chunkEnd,
+      });
+
+      videoStream.pipe(res);
+    } else {
+      res.setHeader('Content-Type', `image/${fileType}`);
+      const imageBuffer = fs.readFileSync(dir);
+      res.send(imageBuffer)
+    }
+
   }
 
 }
