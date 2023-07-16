@@ -1,7 +1,7 @@
 'use client'
 import { Gallery } from '@/components/galerry';
 import { Thumbnail } from '@/components/thumbnail';
-import { covertBlobToImage, loadImage, readFiles } from '@/utils/loadImage';
+import { covertBlobToImage, loadImage } from '@/utils/loadImage';
 import React from 'react';
 import Image from 'next/image'
 import { cwd } from 'process';
@@ -70,13 +70,14 @@ export default function Home() {
             openGallery={() => openGallery(image.imageDir, image.isDir)}></Thumbnail>
         )) || images.map((image: any) => {
           return (
-            <div>
+            <div key={`${image.name}-${image.key}`}>
               <img
-                key={image.key}
+                key={`${image.name}-${image.imageDir}-${image.key}`}
                 src={`/api/images?path=${image.imageDir}`}
                 alt="Your Image"
                 onLoad={handleImageLoad}
-                width="25%" height="25%"
+                width="250"
+                height="250"
                 style={{ display: imageLoaded ? 'block' : 'none' }}
                 onClick={() => openGallery(image.imageDir, image.isDir)}
               />
