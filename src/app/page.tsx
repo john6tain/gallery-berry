@@ -95,7 +95,7 @@ export default function Home() {
 
         </div>
 
-        {!images.length && folders.map((image: any) => (
+        {folders.map((image: any) => (
           <Thumbnail
             key={image.key}
             name={image.name}
@@ -103,7 +103,8 @@ export default function Home() {
             isDir={image.isDir}
             onPress={() => handleClick(image.imageDir, image.isDir)}
             openGallery={() => openGallery()}></Thumbnail>
-        )) || (
+        ))}
+         
             <div className="container flex flex-wrap mx-auto">
 
               {images.map((image: any, index) => {
@@ -127,6 +128,7 @@ export default function Home() {
 
               {videos.length &&
                 videos.map((video: any, index) => {
+                  debugger
                   return (
                     <div className="w-full p-2 rounded lg:w-64 sm:w-64 grow" key={index}>
                       <video
@@ -142,7 +144,7 @@ export default function Home() {
                   );
                 }) || ''}
 
-            </div>)}
+            </div>
       </>
     )
   }
